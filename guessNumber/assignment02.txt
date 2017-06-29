@@ -1,0 +1,288 @@
+CSC 374: Computer Systems II: 2017 Winter
+Assignment #2
+
+Last Modified 2017 January 23
+
+Purpose:
+
+To go over:
+Processes
+Signals
+Computing
+
+Please ssh into one of the following:
+
+140.192.36.184
+140.192.36.185
+140.192.36.186
+140.192.36.187
+or use your own Linux machine.
+Please submit a .zip file (not .7z or any other non-standard compression!) file of your header file and a .txt/.pdf/.doc/.odt file containing your answer to the questions.
+
+Overview:
+
+This application has 3 programs that ask the user to guess 4 yes/no (or 0/1) questions.
+
+When the user guesses one bit correctly, they are go on to guess the next
+When the user guesses one bit incorrectly, they have to go back to the beginning of the sequence and enter the first bit again
+Example output:
+
+The correct sequence is 0-0-1-1
+$ ./launcher 
+(The answer is 12)
+Starting from the beginning:
+What would you like your next guess to be: 0 or 1? 0  (lucky guess of 1st bit)
+position 0: userBit 0, correctBit 0
+Yay!  That was right!
+What would you like your next guess to be: 0 or 1? 0  (lucky guess of 2nd bit)
+position 1: userBit 0, correctBit 0
+Yay!  That was right!
+What would you like your next guess to be: 0 or 1? 0  (Oops!  This bit is wrong!)
+position 2: userBit 0, correctBit 1
+Oops!  That was wrong.  Please restart from the beginning.
+
+
+Re-starting from the beginning:
+What would you like your next guess to be: 0 or 1? 0  (We know this bit from our earlier correct guess)
+position 0: userBit 0, correctBit 0
+Yay!  That was right!
+What would you like your next guess to be: 0 or 1? 0  (We know this bit from our earlier correct guess)
+position 1: userBit 0, correctBit 0
+Yay!  That was right!
+What would you like your next guess to be: 0 or 1? 1  (We know this bit from our earlier incorrect guess, must be opposite)
+position 2: userBit 1, correctBit 1
+Yay!  That was right!
+What would you like your next guess to be: 0 or 1? 0  (Oops!  This last bit is wrong!)
+position 3: userBit 0, correctBit 1
+Oops!  That was wrong.  Please restart from the beginning.
+
+
+Re-starting from the beginning:
+What would you like your next guess to be: 0 or 1? 0  (We know this bit from our earlier correct guess)
+position 0: userBit 0, correctBit 0
+Yay!  That was right!
+What would you like your next guess to be: 0 or 1? 0  (We know this bit from our earlier correct guess)
+position 1: userBit 0, correctBit 0
+Yay!  That was right!
+What would you like your next guess to be: 0 or 1? 1  (We know this bit from our earlier incorrect guess)
+position 2: userBit 1, correctBit 1
+Yay!  That was right!
+What would you like your next guess to be: 0 or 1? 1  (We know this bit from our earlier incorrect guess)
+position 3: userBit 1, correctBit 1
+answerer finished
+
+Congratulations!  You found it!
+guesser finished
+launcher finished
+The user has a time limit (NUM_SECONDS seconds) to find this pattern, or else the game ends automatically:
+
+$ ./launcher 
+(The answer is 1)
+What would you like your next guess to be: 0 or 1? 
+
+(I do not type anything and wait NUM_SECONDS seconds)
+answerer finished
+Oh no!  The time is up!
+guesser finished
+launcher finished
+      
+Please finish this single application implemented with 3 programs:
+
+launcher.c
+
+The program will have 3 global vars: answererPid, guesserPid, and shouldRun. shouldRun should be initialized to 1.
+Its main() install two signal handlers: one for SIGALRM and one for SIGCHLD.
+The SIGALRM handler will tell the two child processes to stop by sending them TIME_OVER_SIGNAL. It also sets shouldRun to 0.
+The SIGCHLD does a waitpid() in a loop to get all finished children. It also sets shouldRun to 0.
+After installing the signal handlers, main() launches first the answering program, and then the guessing program. 
+To when launching the answering program put the child pid in answererPid and have the child run the string constant ANSWERER_PROGNAME. 
+To when launching the guessing program put the child pid in guesserPid and have the child run the string constant GUESSER_PROGNAME. The guesser program must be told the process id of the answering process. Turn that to the string line[] with the following code:
+char	line[LINE_LEN];
+
+snprintf(line,LINE_LEN,"%d",answererPid);
+	    
+Be sure to pass line to the guesser.
+Then main() sets its self up to receive SIGALRM in NUM_SECONDS seconds.
+Lastly main() just does the following:
+while  (shouldRun)
+  sleep(1);
+
+sleep(1);
+sleep(1);
+
+printf("launcher finished\n");
+return(EXIT_SUCCESS);
+	    
+guesser.c
+
+guesser.c should also have a global int shouldRun variable initialized to 1.
+Its main() should make sure it has a command line argument (exiting with EXIT_FAILURE if not). It should that argument is the process id of the answerer. Convert it from a string to an integer and hold on to its value.
+Then, main() should install 4 signal handler:
+The handler for TIME_OVER_SIGNAL announces that the time is up and sets shouldRun to 0.
+The handler for WIN_SIGNAL announces that the user won and sets shouldRun to 0.
+The handler for CORRECT_SIGNAL announces that the user got their last guess correct.
+The handler for INCORRECT_SIGNAL announces that the user got their last guess wrong, and should start again from the beginning.
+NOTE: Perhaps you can make the same handler handle both CORRECT_SIGNAL and INCORRECT_SIGNAL.
+In a while(shouldRun) loop, allow the user to enter their next guess. If they enter 0 send the answerer ZERO_SIGNAL. If they enter 1 send the answerer ONE_SIGNAL. At after sending the signal, do a sleep(1) to give the answerer time to respond.
+After the loop just do:
+printf("guesser finished\n");
+return(EXIT_SUCCESS);
+	    
+assign2Headers.h
+
+Just copy-and-paste the following:
+/*-------------------------------------------------------------------------*
+ *---									---*
+ *---		assign2Headers.h					---*
+ *---									---*
+ *---	    This file includes standard headers and declares constants	---*
+ *---	common to the assignment 2 C programs.				---*
+ *---									---*
+ *---	----	----	----	----	----	----	----	----	---*
+ *---									---*
+ *---	Version 1a		2017 January 9		Joseph Phillips	---*
+ *---									---*
+ *-------------------------------------------------------------------------*/
+
+//---		Common standard header files				---//
+
+#include	<stdlib.h>
+#include	<stdio.h>
+#include	<string.h>
+#include	<signal.h>
+#include	<sys/types.h>
+#include	<sys/wait.h>
+#include	<unistd.h>
+
+
+//---		Common constants:					---//
+
+#define		ZERO_SIGNAL		SIGUSR1
+
+#define		ONE_SIGNAL		SIGUSR2
+
+#define		CORRECT_SIGNAL		SIGUSR1
+
+#define		INCORRECT_SIGNAL	SIGUSR2
+
+#define		WIN_SIGNAL		SIGINT
+
+#define		TIME_OVER_SIGNAL	SIGTERM
+
+#define		GUESSER_PROGNAME	"guesser"
+
+#define		ANSWERER_PROGNAME	"answerer"
+
+#define		LINE_LEN		256
+
+#define		NUM_SECONDS		30
+answerer.c
+
+Just copy-and-paste the following:
+/*-------------------------------------------------------------------------*
+ *---									---*
+ *---		answerer.c						---*
+ *---									---*
+ *---	    This file defines the answerer program for assignment #2.	---*
+ *---									---*
+ *---	----	----	----	----	----	----	----	----	---*
+ *---									---*
+ *---	Version 1a		2017 January 9		Joseph Phillips	---*
+ *---									---*
+ *-------------------------------------------------------------------------*/
+
+//---		Inclusion of header files				---//
+
+#include	"assign2Headers.h"
+
+
+//---		Definition of constants:				---//
+
+#define		PATTERN_LEN	4
+
+
+//---		Definition of global vars:				---//
+
+int		answer;
+
+int		numCorrect	= 0;
+
+int		shouldRun	= 1;
+
+
+//---		Definition of global fncs:				---//
+
+void		timeUpHandler	(int 		sig
+				)
+{
+  shouldRun	= 0;
+}
+
+
+void		guessHandler	(int		sig,
+				 siginfo_t*	infoPtr,
+				 void*		dataPtr
+				)
+{
+  int	toSendBack;
+  int	userBit		= (sig == ONE_SIGNAL);
+  int	correctBit	= ((answer >> numCorrect) & 0x1);
+  int	isCorrect	= (correctBit == userBit);
+
+  printf("position %d: userBit %d, correctBit %d\n",
+	 numCorrect,userBit,correctBit
+	);
+
+  if  (isCorrect)
+  {
+    numCorrect++;
+
+    if  (numCorrect >= PATTERN_LEN)
+      toSendBack = WIN_SIGNAL;
+    else
+      toSendBack = CORRECT_SIGNAL;
+  }
+  else
+  {
+    numCorrect	= 0;
+    toSendBack	= INCORRECT_SIGNAL;
+  }
+
+  kill(infoPtr->si_pid,toSendBack);
+}
+
+
+int		main		(int	argc,
+				 char*	argv[]
+				)
+{
+  //  I.  Application validity check:
+
+  //  II.  Run program:
+  //  II.A.  Initialize random number generator and choice:
+  srand(getpid());
+
+  answer	= rand() % (1 << PATTERN_LEN);
+
+printf("(The answer is %d)\n",answer);
+
+  //  II.B.  Install signal handlers:
+  struct sigaction	act;
+
+  memset(&act,'\0',sizeof(act));
+  act.sa_handler	= timeUpHandler;
+  sigaction(TIME_OVER_SIGNAL,&act,NULL);
+
+  act.sa_flags		= SA_SIGINFO;
+  act.sa_sigaction	= guessHandler;
+  sigaction(ZERO_SIGNAL,&act,NULL);
+  sigaction(ONE_SIGNAL,&act,NULL);
+
+  //  II.C.  Hand out while game still active:
+  while  ( (numCorrect < PATTERN_LEN)  &&  shouldRun )
+    sleep(1);
+
+  //  III.  Finished, return answer:
+  printf("answerer finished\n");
+  return(EXIT_SUCCESS);
+}

@@ -1,0 +1,860 @@
+CSC 374: Computer Systems II: 2017 Winter
+Assignment #3
+
+Last Modified 2017 February 15
+
+Purpose:
+
+To go over:
+Threads
+Memory management
+Computing
+
+Please ssh into one of the following:
+
+140.192.36.184
+140.192.36.185
+140.192.36.186
+140.192.36.187
+or use your own Linux machine.
+Please submit a .zip file (not .7z or any other non-standard compression!) of both feedTheBaby.cpp and separator.c.
+
+feedTheBaby (50 Points)
+
+Overview:
+
+You are the mother of a growing baby. You need to feed your baby regularly. And, of course, after it eats it deposits the residue into its diapers. You're the mother, you have to deal with that too.
+
+In this program, the following have their own threads:
+
+The mama
+(You the user!)	
+The mama thread is the main parent thread of the program.
+
+The mama has the option to either:
+Feed the baby
+Change the diapers
+Quit the program and give the baby up for adoption
+The baby	
+There is a single, joinable (i.e. ordinary) child thread.
+
+The baby reports if it is hungry with one of these statements:
+"Hear that gut growling? It's EMPTY!"
+"How do you expect me to gain weight?"
+"Lunch time!"
+"My tummy says it's bored!"
+The baby reports if its diapers need to be changed with one of these statements:
+
+"Yuck! Can't you SMELL that?"
+"It was warm when it came out, but now it's nasty!"
+"Eeww! I have a soggy bottom!"
+"I have an itchy bottom!"
+The meals	
+Each meal runs in its own detached thread.
+
+Each meal follows the same path:
+stomach ==> small intestine  ==> large intestine  ==> diaper 
+		    
+The only exception to this is when you try to feed your baby when its stomach is full. Then the baby reports:
+
+"There's no space for (meal)!  I'm spitting it on to the floor!"
+		    
+Then that food thread ends.
+You must do this program in two stages:
+
+Make it multi-threaded but not yet thread-safe by writing main(). What happens when you feed your baby too rapidly?
+Make it multi-threaded and thread-safe. What happens when you feed your baby too rapidly?
+Pre-emptive stance against sexism:
+
+If you do not like the mama doing all the work, you are free to replace mama => papa.
+
+Sample output (multi-threaded, thread-safe):
+
+$ ./feedTheBaby
+What's a mother to do?
+	(1) Feed my baby,
+	(2) Change the diapers,
+	(0) Give the baby up for adoption:
+Baby: "Lunch time!  WWWAAHH!"
+Baby: "My tummy says it's bored!  WWWAAHH!"
+1 (the baby said it was hungry, so I fed it)
+What's a mother to do?
+	(1) Feed my baby,
+	(2) Change the diapers,
+	(0) Give the baby up for adoption:
+Baby "applesauce?  I'll give it a try . . ."
+The applesauce is entering the stomach
+Baby: "How do you expect me to gain weight?  WWWAAHH!"
+1 (the baby said it was hungry, so I fed it)
+What's a mother to do?
+	(1) Feed my baby,
+	(2) Change the diapers,
+	(0) Give the baby up for adoption:
+Baby "porridge?  I'll give it a try . . ."
+The porridge is entering the stomach
+The applesauce is entering the small intestine
+The applesauce is leaving the stomach
+The applesauce is entering the large intestine
+The applesauce is leaving the small intestine
+The porridge is entering the small intestine
+The porridge is leaving the stomach
+The applesauce is leaving the large intestine
+(applesauce entering diaper)
+The porridge is entering the large intestine
+The porridge is leaving the small intestine
+The porridge is leaving the large intestine
+(porridge entering diaper)
+Baby: "Hear that gut growling?  It's EMPTY!  WWWAAHH!"
+1 (the baby said it was hungry, so I fed it)
+What's a mother to do?
+	(1) Feed my baby,
+	(2) Change the diapers,
+	(0) Give the baby up for adoption:
+Baby "porridge?  I'll give it a try . . ."
+The porridge is entering the stomach
+Baby: "Hear that gut growling?  It's EMPTY!  WWWAAHH!"
+1 (the baby said it was hungry, so I fed it)
+Baby: "I have an itchy bottom!  WWWAAHH!"
+
+What's a mother to do?
+	(1) Feed my baby,
+	(2) Change the diapers,
+	(0) Give the baby up for adoption:
+Baby "milk?  I'll give it a try . . ."
+The milk is entering the stomach
+The porridge is entering the small intestine
+The porridge is leaving the stomach
+Baby: "Yuck! Can't you SMELL that?  WWWAAHH!"
+The milk is entering the small intestine
+The milk is leaving the stomach
+2 (the baby said it was dirty, so I changed the diapers)
+The porridge is entering the large intestine
+The porridge is leaving the small intestine
+
+Mama: "Where's Daddy at a time like this?!"
+What's a mother to do?
+	(1) Feed my baby,
+	(2) Change the diapers,
+	(0) Give the baby up for adoption:
+The porridge is leaving the large intestine
+(porridge entering diaper)
+Baby: "My tummy says it's bored!  WWWAAHH!"
+The milk is entering the large intestine
+The milk is leaving the small intestine
+1 (the baby said it was hungry, so I fed it)
+What's a mother to do?
+	(1) Feed my baby,
+	(2) Change the diapers,
+	(0) Give the baby up for adoption:
+Baby "yogurt?  I'll give it a try . . ."
+The yogurt is entering the stomach
+The milk is leaving the large intestine
+(milk entering diaper)
+Baby: "Lunch time!  WWWAAHH!"
+The yogurt is entering the small intestine
+The yogurt is leaving the stomach
+1 (the baby said it was hungry, so I fed it)
+What's a mother to do?
+	(1) Feed my baby,
+	(2) Change the diapers,
+	(0) Give the baby up for adoption:
+Baby "5 course candle-lit dinner?  I'll give it a try . . ."
+The 5 course candle-lit dinner is entering the stomach
+The yogurt is entering the large intestine
+The yogurt is leaving the small intestine
+The 5 course candle-lit dinner is entering the small intestine
+The 5 course candle-lit dinner is leaving the stomach
+The yogurt is leaving the large intestine
+(yogurt entering diaper)
+Baby: "It was warm when it came out, but now it's nasty!  WWWAAHH!"
+2 (the baby said it was dirty, so I changed the diapers)
+Mama: "A mother's work is never done!"
+What's a mother to do?
+	(1) Feed my baby,
+	(2) Change the diapers,
+	(0) Give the baby up for adoption:
+Baby: "Lunch time!  WWWAAHH!"
+1 (the baby said it was hungry, so I fed it)
+What's a mother to do?
+	(1) Feed my baby,
+	(2) Change the diapers,
+	(0) Give the baby up for adoption:
+Baby "carrots?  I'll give it a try . . ."
+The carrots is entering the stomach
+The 5 course candle-lit dinner is entering the large intestine
+The 5 course candle-lit dinner is leaving the small intestine
+1 (the baby said it was hungry, so I fed it)
+What's a mother to do?
+	(1) Feed my baby,
+	(2) Change the diapers,
+	(0) Give the baby up for adoption:
+Baby "applesauce?  I'll give it a try . . ."
+The applesauce is entering the stomach
+The carrots is entering the small intestine
+The carrots is leaving the stomach
+The 5 course candle-lit dinner is leaving the large intestine
+(5 course candle-lit dinner entering diaper)
+The applesauce is entering the small intestine
+The applesauce is leaving the stomach
+The applesauce is entering the large intestine
+The applesauce is leaving the small intestine
+carrots is being held up in the large intestine
+Baby: "It was warm when it came out, but now it's nasty!  WWWAAHH!"
+2 (the baby said it was dirty, so I changed the diapers)
+Mama: "Where's Daddy at a time like this?!"
+What's a mother to do?
+	(1) Feed my baby,
+	(2) Change the diapers,
+	(0) Give the baby up for adoption:
+The applesauce is leaving the large intestine
+(applesauce entering diaper)
+The carrots is entering the large intestine
+The carrots is leaving the small intestine
+Baby: "My tummy says it's bored!  WWWAAHH!"
+1 (the baby said it was hungry, so I fed it)
+What's a mother to do?
+	(1) Feed my baby,
+	(2) Change the diapers,
+	(0) Give the baby up for adoption:
+Baby "peas?  I'll give it a try . . ."
+The peas is entering the stomach
+The carrots is leaving the large intestine
+(carrots entering diaper)
+Baby: "I have an itchy bottom!  WWWAAHH!"
+2 (the baby said it was dirty, so I changed the diapers)
+Mama: "Where's Daddy at a time like this?!"
+What's a mother to do?
+	(1) Feed my baby,
+	(2) Change the diapers,
+	(0) Give the baby up for adoption:
+Baby: "How do you expect me to gain weight?  WWWAAHH!"
+The peas is entering the small intestine
+The peas is leaving the stomach
+1 (the baby said it was hungry, so I fed it)
+What's a mother to do?
+	(1) Feed my baby,
+	(2) Change the diapers,
+	(0) Give the baby up for adoption:
+Baby "milk?  I'll give it a try . . ."
+The milk is entering the stomach
+The milk is entering the small intestine
+The milk is leaving the stomach
+The peas is entering the large intestine
+The peas is leaving the small intestine
+milk is being held up in the large intestine
+The peas is leaving the large intestine
+(peas entering diaper)
+The milk is entering the large intestine
+The milk is leaving the small intestine
+Baby: "Lunch time!  WWWAAHH!"
+1 (the baby said it was hungry, so I fed it)
+What's a mother to do?
+	(1) Feed my baby,
+	(2) Change the diapers,
+	(0) Give the baby up for adoption:
+Baby "milk?  I'll give it a try . . ."
+The milk is entering the stomach
+The milk is leaving the large intestine
+(milk entering diaper)
+Baby: "How do you expect me to gain weight?  WWWAAHH!"
+Baby: "Yuck! Can't you SMELL that?  WWWAAHH!"
+The milk is entering the small intestine
+The milk is leaving the stomach
+1 (the baby said it was hungry, so I fed it)
+What's a mother to do?
+	(1) Feed my baby,
+	(2) Change the diapers,
+	(0) Give the baby up for adoption:
+Baby "5 course candle-lit dinner?  I'll give it a try . . ."
+The 5 course candle-lit dinner is entering the stomach
+2 (the baby said it was dirty, so I changed the diapers)
+Mama: "Dirty work, but someone's gotta do it!"
+What's a mother to do?
+	(1) Feed my baby,
+	(2) Change the diapers,
+	(0) Give the baby up for adoption:
+The milk is entering the large intestine
+The milk is leaving the small intestine
+The 5 course candle-lit dinner is entering the small intestine
+The 5 course candle-lit dinner is leaving the stomach
+The milk is leaving the large intestine
+(milk entering diaper)
+Baby: "Yuck! Can't you SMELL that?  WWWAAHH!"
+The 5 course candle-lit dinner is entering the large intestine
+The 5 course candle-lit dinner is leaving the small intestine
+Baby: "My tummy says it's bored!  WWWAAHH!"
+2 (the baby said it was dirty, so I changed the diapers)
+Mama: "A mother's work is never done!"
+What's a mother to do?
+	(1) Feed my baby,
+	(2) Change the diapers,
+	(0) Give the baby up for adoption:
+Baby: "My tummy says it's bored!  WWWAAHH!"
+The 5 course candle-lit dinner is leaving the large intestine
+(5 course candle-lit dinner entering diaper)
+Baby: "How do you expect me to gain weight?  WWWAAHH!"
+Baby: "My tummy says it's bored!  WWWAAHH!"
+Baby: "Hear that gut growling?  It's EMPTY!  WWWAAHH!"
+Baby: "I have an itchy bottom!  WWWAAHH!"
+Baby: "Hear that gut growling?  It's EMPTY!  WWWAAHH!"
+2 (the baby said it was dirty, so I changed the diapers)
+Mama: "Hold your nose during, wash your hands after!"
+What's a mother to do?
+	(1) Feed my baby,
+	(2) Change the diapers,
+	(0) Give the baby up for adoption:
+Baby: "How do you expect me to gain weight?  WWWAAHH!"
+Baby: "Lunch time!  WWWAAHH!"
+Baby: "How do you expect me to gain weight?  WWWAAHH!"
+0 (I am getting tired of this baby!)
+Mama "Now you're someone ELSE's problem!"
+	    
+Coding:
+
+Copy and paste the code below
+/*-------------------------------------------------------------------------*
+ *---									---*
+ *---		feedTheBaby.cpp						---*
+ *---									---*
+ *---	    This program simulates a mother having to periodically	---*
+ *---	feed, and clean up after, a baby.  The food and the baby are	---*
+ *---	all implemented with threads.					---*
+ *---									---*
+ *---	----	----	----	----	----	----	----	----	---*
+ *---									---*
+ *---	Version 1.0		2017 February 7		Joseph Phillips	---*
+ *---									---*
+ *-------------------------------------------------------------------------*/
+
+//		Compile with:
+//			g++ feedTheBaby.cpp -lpthread -o feedTheBaby
+
+
+//---		Header inclusion and namespace specification:		---//
+
+#include	<cstdlib>
+#include	<cstdio>
+#include	<string>
+#include	<iostream>
+#include	<pthread.h>
+#include	<unistd.h>
+#include	<set>
+
+using	namespace	std;
+
+
+//---		Definition of constants:				---//
+
+//  PURPOSE:  To tell the length of char arrays.
+const int	MAX_LINE				= 256;
+
+//  PURPOSE:  To tell the minimum number of meals that must be somewhere in
+//	the gut of the baby before it reports that it is hungry.
+const int	MIN_NUM_MEALS_BEFORE_REPORT_HUNGRY	= 2;
+
+
+//  PURPOSE:  To tell the tell the minimum load that the diaper can hold
+//	before it reports that the diaper must be changed.
+const int	DIAPER_LOAD_BEFORE_GUARANTEE_COMPLAINT	= 4;
+
+
+//  PURPOSE:  To tell the names of the foods that the baby can eat.
+const char*	FOOD_ARRAY[]				=
+  		{ "applesauce",
+		  "yogurt",
+		  "milk",
+		  "porridge",
+		  "carrots",
+		  "peas",
+		  "5 course candle-lit dinner"
+		};
+
+
+//  PURPOSE:  To tell what the baby will report when it is hungry.
+const char*	HUNGRY_MSG_ARRAY[]			=
+      		{"Hear that gut growling?  It's EMPTY!",
+		 "How do you expect me to gain weight?",
+		 "Lunch time!",
+		 "My tummy says it's bored!"
+		};
+
+
+//  PURPOSE:  To tell what the baby will report when its diaper needs to be
+//	changed.
+const char*	DIRTY_DIAPER_MSG_ARRAY[]		=
+      		{"Yuck! Can't you SMELL that?",
+		 "It was warm when it came out, but now it's nasty!",
+		 "Eeww!  I have a soggy bottom!",
+		 "I have an itchy bottom!"
+		};
+
+
+//  PURPOSE:  To tell what the mama will say when she changes the diaper.
+const char*	REPLACE_DIAPER_MSG_ARRAY[]		=
+      		{"Hold your nose during, wash your hands after!",
+		 "Dirty work, but someone's gotta do it!",
+		 "A mother's work is never done!",
+		 "Where's Daddy at a time like this?!"
+		};
+
+
+//---		Definition of classes:				---//
+
+//  PURPOSE:  To implement a digestive organ of the baby.
+class		DigestiveOrgan
+{
+  //  I.  Member vars:
+  //  PURPOSE:  To hold the name of '*this' organ.
+  std::string			name_;
+
+  //  PURPOSE:  To tell the maximum number of meals that '*this' organ can hold.
+  int				maxCapacity_;
+
+  //  PURPOSE:  To tell the current number of meals in '*this' organ.
+  int				currentNumMeals_;
+
+  //  II.  Disallowed methods:
+  //  No default constructor:
+  DigestiveOrgan		();
+
+  //  No copy constructor:
+  DigestiveOrgan		(const DigestiveOrgan&
+				);
+
+  //  No copy assignment op:
+  DigestiveOrgan&
+		operator=	(const DigestiveOrgan&
+				);
+
+protected :
+  //  III.  Protected methods:
+
+public :
+  //  IV.  Constructor(s), assignment op(s), factory(s) and destructor:
+  //  PURPOSE:  To initialize '*this' DigestiveOrgan to have name 'newName'
+  //	and capacity for 'newCapacity' meals.  No return value.
+  DigestiveOrgan		(const std::string&	newName,
+  				 int   			newCapacity
+				) :
+				name_(newName),
+				maxCapacity_(newCapacity),
+				currentNumMeals_(0)
+				{
+				}
+
+  //  PURPOSE:  To release the resources of '*this'.  No parameters.  No return
+  //	value.
+  ~DigestiveOrgan		()
+  				{
+				}
+
+  //  V.  Accessors:
+  //  PURPOSE:  To return the name of '*this' organ.  No parameters.
+  const std::string&
+		getName		()
+				const
+				{ return(name_); }
+
+  //  PURPOSE:  To return the maximum number of meals that '*this' organ can
+  //	hold.  No parameters.
+  int		getMaxCapacity	()
+				const
+				{ return(maxCapacity_); }
+
+  //  PURPOSE:  To return the current number of meals in '*this' organ.  No
+  //	parameters.
+  int		getCurrentNumMeals
+				()
+				const
+				{ return(currentNumMeals_); }
+
+  //  PURPOSE:  To return 'true' if '*this' is full.  No parameters.
+  bool		isFull		()
+				const
+				{
+				  return( getCurrentNumMeals() >=
+					  getMaxCapacity()
+					);
+				}
+
+  //  VI.  Mutators:
+
+  //  VII.  Methods that do main and misc work of class:
+  //  PURPOSE:  To make the food named 'mealCPtr' enter '*this' DigestiveOrgan.
+  //	No return value.
+  void		enter		(const char*	mealCPtr
+				)
+  {
+
+    while  (getCurrentNumMeals() >= getMaxCapacity())
+    {
+      printf("%s is being held up in the %s\n",mealCPtr,getName().c_str());
+    }
+
+    currentNumMeals_++;
+
+    if  (getCurrentNumMeals() > getMaxCapacity())
+    {
+      printf("The baby's %s was overstuffed and ruptured!\n",getName().c_str());
+      printf("The baby is dead!\n");
+      exit(EXIT_FAILURE);
+    }
+
+    printf("The %s is entering the %s\n",mealCPtr,getName().c_str());
+  }
+
+  //  PURPOSE:  To make the food named 'mealCPtr' leave '*this' DigestiveOrgan.
+  //	No return value.
+  void		leave		(const char*	mealCPtr
+  				)
+  {
+    currentNumMeals_--;
+
+    if  (getCurrentNumMeals() < 0)
+    {
+      printf("The The baby's %s was sucked dry and imploded!\n",
+	     getName().c_str()
+	    );
+      printf("The baby is dead!\n");
+      exit(EXIT_FAILURE);
+    }
+
+    printf("The %s is leaving the %s\n",mealCPtr,getName().c_str());
+
+  }
+
+};
+
+
+//  PURPOSE:  To implement the diaper on the baby.
+class		Diaper
+{
+  //  I.  Member vars:
+  //  PURPOSE:  To tell the total number of meals that have been "deposited"
+  //	into '*this' Diaper.
+  int				loadCount_;
+
+  //  II.  Disallowed auto-generated methods:
+  //  No copy constructor:
+  Diaper			(const Diaper&
+  				);
+
+  //  No copy assignment op:
+  Diaper&	operator=	(const Diaper&
+  				);
+
+protected :
+  //  III.  Protected methods:
+
+public :
+  //  IV.  Constructor(s), assignment op(s), factory(s) and destructor:
+  //  PURPOSE:  To initialize '*this' Diaper to be empty (clean).
+  Diaper			() :
+  				loadCount_(0)
+				{
+				}
+
+  //  PURPOSE:  To release the resources of '*this'.  No parameters.  No return
+  //	value.
+  ~Diaper			()
+  				{
+				}
+
+  //  V.  Accessors:
+  //  PURPOSE:  To return the current number of meal deposited into '*this'
+  //	Diaper.  No parameters.
+  int		getLoadCount	()
+				const
+				{ return(loadCount_); }
+
+  //  VI.  Mutators:
+  //  PURPOSE:  To deposit the meal named 'mealNameCPtr' into '*this' Diaper.
+  //	No return value.
+  void	   	makeDeposit	(const char*	mealNameCPtr
+				)
+				{
+				  printf("(%s entering diaper)\n",mealNameCPtr);
+				  loadCount_++;
+				}
+
+  //  PURPOSE:  To replace '*this' Diaper with a clean one.  No parameters.
+  //	No return value.
+  void	   	replace		()
+				{
+				  loadCount_	= 0;
+				}
+
+
+  //  VII.  Methods that do main and misc work of class:
+
+};
+
+
+//---		Global functions and objects:				---//
+
+//  PURPOSE:  To represent the stomach of the baby.
+DigestiveOrgan	stomach("stomach",2);
+
+//  PURPOSE:  To represent the small intestine of the baby.
+DigestiveOrgan	smallIntestine("small intestine",3);
+
+//  PURPOSE:  To represent the large intestine of the baby.
+DigestiveOrgan	largeIntestine("large intestine",1);
+
+//  PURPOSE:  To represent the diaper on the baby.
+Diaper		diaper;
+
+//  PURPOSE:  To hold 'true' while this program should run, or 'false'
+//	otherwise.
+bool 		shouldRun	      = true;
+
+
+//  PURPOSE:  To randomly choose and return a 'const char*' member from array
+//	'array[]' of size 'arraySize'
+const char*	obtainRandomMessage
+      			(size_t		arraySize,
+			 const char*	array[]
+      			)
+{
+  return(array[rand() % (arraySize / sizeof(const char*))]);
+}
+
+
+//  PURPOSE:  To randomly select and return the name of a food.  No parameters.
+const char*	selectFood	()
+{
+  return( obtainRandomMessage(sizeof(FOOD_ARRAY),FOOD_ARRAY) );
+}
+
+
+//  PURPOSE:  To change the diaper, but complain about it.  No parameters.
+//	No return value.
+void		replaceDiaper	()
+{
+  const char* msgCPtr =	obtainRandomMessage
+				(sizeof(REPLACE_DIAPER_MSG_ARRAY),
+				 REPLACE_DIAPER_MSG_ARRAY
+				);
+  printf("Mama: \"%s\"\n",msgCPtr);
+  diaper.replace();
+}
+
+
+//  PURPOSE:  To process the meal whose 'const char*' name is pointed to by
+//	'vPtr'.  Returns 'NULL'.
+void*		processMeal	(void*	vPtr
+				)
+{
+  //  I.  Application validity check:
+  if  (vPtr == NULL)
+  {
+    fprintf(stderr,"NULL ptr to processMeal(), quitting\n");
+    exit(EXIT_FAILURE);
+  }
+
+  //  II.  Handle attempting to eat the food:
+  //  II.A.  Get the name of the food:
+  const char*	mealNamePtr	= (const char*)vPtr;
+
+  //  II.B.  Just give up if the stomach is already full:
+  if  ( stomach.isFull() )
+  {
+    printf("Baby \"There's no space for %s!"
+    	   "  I'm spitting it on to the floor!\"\n",
+	   mealNamePtr
+	  );
+    return(NULL);
+  }
+
+  //  II.C.  Let the food pass thru the gut:
+  printf("Baby \"%s?  I'll give it a try . . .\"\n",mealNamePtr);
+
+  stomach.       enter(mealNamePtr);
+  sleep(3 + rand() % 3);
+  smallIntestine.enter(mealNamePtr);
+  stomach.       leave(mealNamePtr);
+  sleep(3 + rand() % 3);
+  largeIntestine.enter(mealNamePtr);
+  smallIntestine.leave(mealNamePtr);
+  sleep(3 + rand() % 3);
+  largeIntestine.leave(mealNamePtr);
+  diaper.makeDeposit(mealNamePtr);
+
+  //  III.  Finished:
+  return(NULL);
+}
+
+
+//  PURPOSE:  To be the function that reports on the status of the baby.
+//	Ignores 'vPtr'.  Returns 'NULL'.
+void*		beTheBaby	(void*	vPtr
+				)
+{
+  //  I.  Application validity check:
+
+  //  II.  Be the baby:
+  //  II.A.  Each iteration considers complaining about an empty gut and
+  //  	     considers complaining about a soiled diaper.
+  while  (shouldRun)
+  {
+    //  II.A.1.  Consider complaining about an empty gut:
+    if  ( (stomach.getCurrentNumMeals()		+
+    	   smallIntestine.getCurrentNumMeals()	+
+    	   largeIntestine.getCurrentNumMeals()
+	  )
+	  < MIN_NUM_MEALS_BEFORE_REPORT_HUNGRY
+	)
+    {
+      const char* msgCPtr =	obtainRandomMessage
+					(sizeof(HUNGRY_MSG_ARRAY),
+					 HUNGRY_MSG_ARRAY
+					);
+      printf("Baby: \"%s  WWWAAHH!\"\n",msgCPtr);
+    }
+
+    sleep(1 + rand() % 2);
+
+    //  II.A.2.  Consider complaining about a soiled diaper:
+    if  (diaper.getLoadCount()>(rand()%DIAPER_LOAD_BEFORE_GUARANTEE_COMPLAINT))
+    {
+      const char* msgCPtr =	obtainRandomMessage
+					(sizeof(DIRTY_DIAPER_MSG_ARRAY),
+					 DIRTY_DIAPER_MSG_ARRAY
+					);
+      printf("Baby: \"%s  WWWAAHH!\"\n",msgCPtr);
+    }
+
+    sleep(1 + rand() % 2);
+  }
+
+  //  III.  Finished:
+  return(EXIT_SUCCESS);
+}
+
+
+int		main		(int	argc,
+				 char*	argv[]
+				)
+{
+  if  (argc > 1)
+    srand(strtol(argv[1],NULL,10));
+  else
+    srand(getpid());
+
+  //  YOUR CODE HERE
+
+
+  printf("Mama \"Now you're someone ELSE's problem!\"\n");
+  fflush(stdout);
+  return(EXIT_SUCCESS);
+}
+
+		
+Make it multi-threaded but not yet thread-safe by writing main().
+Have an ordinary child thread run function beTheBaby(). Just pass NULL as its argument.
+In a loop continually ask:
+printf("What's a mother to do?\n"
+       "\t(1) Feed my baby,\n"
+       "\t(2) Change the diapers,\n"
+       "\t(0) Give the baby up for adoption:\n"
+      );
+		    
+get a response and make sure it 0, 1, or 2.
+For 1: Make a detached thread run processMeal(). This function wants an argument. Call selectFood() to obtain the name of a food to give to it.
+For 2: Just call replaceDiaper()
+For 0: Exit your loop and set shouldRun to false.
+After the loop ends, be sure to:
+Wait for your baby thread
+Clean up any pthread_attr_t state you may have created to define the detached threads.
+Answer this question: What happens when you feed your baby too rapidly? 
+You must put the answer to this question in a comment at the very end of your program feedTheBaby.cpp!
+
+Now make it thread safe by:
+Add both a single mutex and a single condition to class DigestiveOrgan
+Declare them with the other member vars
+Initialize them in the constructor
+Get rid of them in the destructor (~DigestiveOrgan())
+Use them in enter(). Lock enter() while you are working, but enter() should be unlocked when you leave. Be sure to wait until you are signaled in the DigestiveOrgan is not yet ready.
+Use them in leave(). Lock leave() while you are working, but leave() should be unlocked when you leave. Because a meal is leaving, it can signal another meal thread that is waiting to enter.
+Add a single mutex to class Diaper
+Declare them with the other member vars
+Initialize them in the constructor
+Get rid of them in the destructor (~Diaper())
+Use them in makeDeposit(). Leave the Diaper unlocked when you leave.
+Use them in replace(). Leave the Diaper unlocked when you leave.
+separator.c (50 Points)
+
+Overview:
+
+Write a C program that:
+Lets the user safely enter a string.
+Parses that string into a linked list of smaller strings. The smaller strings come from the strings between the commas in the string the user entered.
+
+For example, if the user types:
+
+12345,1234,123,12,1,,
+		  
+then the program should separate it into 7 strings:
+"12345"
+"1234"
+"123"
+"12"
+"1"
+""
+""
+Saves the sequence of strings as a linked list.
+Prints the linked list.
+free()s the linked list.
+Sample output:
+
+$ ./separator 
+Please enter a line of text: Mary,had,a,little,lamb
+	"Mary"
+	"had"
+	"a"
+	"little"
+	"lamb"
+$ ./separator 
+Please enter a line of text: ,,    ,,
+	""
+	""
+	"    "
+	""
+	""
+$ ./separator 
+Please enter a line of text: 12345,1234,123,12,1,,
+	"12345"
+	"1234"
+	"123"
+	"12"
+	"1"
+	""
+	""
+	    
+Coding:
+
+You must put your strings in the following C (not C++) list node:
+struct		Word
+{
+  char*		textPtr_;
+  struct Word*	nextPtr_;
+};
+		
+Also, you may only use the following C string functions (of course you will not need them all):
+printf(), fprintf(), malloc(), calloc(), realloc(), free(), fgets(), snprintf(), strncpy(), strncat(), strncmp(), strdup(), strlen() and strchr()
+HINT: I recommend writing 4 functions:
+struct Word* obtainCommaSeparatedList (const char* string)
+void printCommaSeparatedList (const struct Word* list)
+void freeCommaSeparatedList (struct Word* list)
+int main() (of course!)
+MORE HINTS:
+To get rid of the annoying \n char that fgets() adds to the end of entered strings, do something like:
+  char*		cPtr	= strchr(line,'\n');
+
+  if  (cPtr != NULL)
+    *cPtr = '\0';
+		    
+Have a char* variable (e.g. charRun) that starts at the beginning of the next string (e.g. start). Advance charRun to the next comma or nul character (noting it may already be at one). Then use pointer arithmetic to determine how many chars separate the two (charRun - string)
+To make a new heap-allocated struct Word node, say:
+struct Word*	toReturn	= (struct Word*)malloc(sizeof(struct Word));
+		    
